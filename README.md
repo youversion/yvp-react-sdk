@@ -1,25 +1,48 @@
 # YouVersion Platform React SDK
 
-A simple React SDK for authenticating with the YouVersion Platform. This package provides a React hook and components to handle the "Sign in with YouVersion" OAuth flow.
+A simple React SDK for authenticating with the YouVersion Platform. This package provides a React hook and a pre-styled button to handle the "Sign in with YouVersion" OAuth flow.
 
 ## Installation
 
-You can install this package directly from its GitHub repository. In your project's terminal, run:
+You can install this package directly from its GitHub repository.
+
+#### Standard Method
+
+In your project's terminal, run:
 
 ```bash
 npm install github:youversion/yvp-react-sdk
 ```
 
+#### Alternative Method (for CI/CD or Build Tools)
+
+Some build environments (like Docker containers, Netlify, Vercel, or other no-code platforms) may not have SSH configured. If the command above fails with an SSH error, use the `git+https` URL instead:
+
+```bash
+npm install git+https://github.com/youversion/yvp-react-sdk.git
+```
+
+### A Note on Imports
+
+When you install directly from GitHub, the package name is taken from the `package.json` file, not from a scoped NPM registry name. Therefore, your import statements should use `yvp-react-sdk`:
+
+```tsx
+// Correct import
+import { useYouVersionLogin } from 'yvp-react-sdk';
+
+// Incorrect import
+import { useYouVersionLogin } from '@youversion/yvp-react-sdk'; // This will not work
+```
+
 ## How to Use
 
-The SDK is composed of three main parts:
-1.  `useYouVersionLogin`: A React hook that manages the login state and initiates the login flow.
-2.  `YouVersionLoginButton`: A pre-styled button component that you can use to trigger the login.
-3.  `processLoginCallback`: A function to handle the OAuth redirect from YouVersion.
+The SDK is designed to be straightforward. The two main parts you'll use together are:
+1.  `YouVersionLoginButton`: A pre-styled "Sign in with YouVersion" button component.
+2.  `useYouVersionLogin`: A React hook that provides the `login` function for the button and handles the `onSuccess` and `onError` callbacks.
 
-### Step 1: Set Up the Login Component
+### Step 1: Add the Login Button
 
-In the component where you want your login button, use the `useYouVersionLogin` hook and connect it to the `YouVersionLoginButton`.
+In the component where you want your login button, import `YouVersionLoginButton` and `useYouVersionLogin`. Use the hook to get a `login` function, and pass that function to the button's `onClick` prop.
 
 ```tsx
 // src/components/Login.tsx
@@ -40,8 +63,7 @@ const Login = () => {
     onSuccess: (result) => {
       setLoginData(result);
       setError(null);
-      // You can now use result.lat to make authenticated API calls
-      console.log('Login successful:', result);
+      console.log('Login successful! You can now use the LAT:', result.lat);
     },
     onError: (error) => {
       setError(error);
@@ -51,10 +73,10 @@ const Login = () => {
 
   return (
     <div>
+      <h2>Sign In</h2>
       {loginData ? (
         <div>
           <p>Welcome! You are logged in.</p>
-          <p>Your Limited Access Token is: {loginData.lat}</p>
         </div>
       ) : (
         <YouVersionLoginButton onClick={login} />
@@ -71,9 +93,9 @@ export default Login;
 
 YouVersion will redirect the user to a specific callback URL after they log in. You need to create a page in your application to handle this redirect.
 
-**Important:** You must register your callback URL (e.g., `http://localhost:3000/callback`) in your app's settings on the YouVersion Platform developer portal.
+**Important:** You must register this callback URL (e.g., `http://localhost:3000/callback`) in your app's settings on the YouVersion Platform developer portal.
 
-Create a simple component for your callback route.
+Create a simple component for your callback route that calls the `processLoginCallback` function.
 
 ```tsx
 // src/pages/Callback.tsx
@@ -82,8 +104,7 @@ import { processLoginCallback } from 'yvp-react-sdk';
 
 const CallbackPage = () => {
   useEffect(() => {
-    // This function handles the communication back to the main window
-    // and then closes the popup.
+    // This function handles communication with the main window and closes the popup.
     processLoginCallback();
   }, []);
 
