@@ -119,6 +119,39 @@ function App() {
 export default App;
 ```
 
+### Step 4 (Optional): Fetching User Data
+
+Once you have a `lat` (Limited Access Token) from a successful login, you can use the included `fetchUserProfile` helper function to get the user's details.
+
+```tsx
+import { fetchUserProfile, UserProfile, LoginSuccess } from 'yvp-react-sdk';
+import { useState } from 'react';
+
+// ... inside your component ...
+
+const [user, setUser] = useState<UserProfile | null>(null);
+
+const handleLoginSuccess = async (loginData: LoginSuccess) => {
+  try {
+    const profile = await fetchUserProfile(loginData.lat);
+    setUser(profile);
+    console.log('User profile:', profile);
+  } catch (e) {
+    console.error("Failed to fetch user profile:", e);
+  }
+}
+```
+
+This will return a `UserProfile` object:
+```ts
+interface UserProfile {
+  id: number;
+  first_name: string;
+  last_name: string;
+  avatar_url: string; // A URL template, e.g. "//.../{width}x{height}/...jpg"
+}
+```
+
 ## Running the Demo App
 
 This repository includes a functional demo application in the `/example` directory that demonstrates a complete implementation.

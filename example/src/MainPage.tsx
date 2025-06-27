@@ -4,14 +4,9 @@ import {
   useYouVersionLogin,
   LoginSuccess,
   LoginError,
+  fetchUserProfile,
+  UserProfile,
 } from 'yvp-react-sdk';
-
-interface UserProfile {
-  id: number;
-  first_name: string;
-  last_name: string;
-  avatar_url: string;
-}
 
 const MainPage = () => {
   const [loginSuccess, setLoginSuccess] = useState<LoginSuccess | null>(null);
@@ -33,19 +28,10 @@ const MainPage = () => {
 
   useEffect(() => {
     if (loginSuccess?.lat) {
-      const fetchProfile = async () => {
+      const getProfile = async () => {
         try {
-          const response = await fetch(
-            `https://api-dev.youversion.com/auth/me?lat=${loginSuccess.lat}`
-          );
-          if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(
-              `Failed to fetch user profile: ${response.status} ${errorText}`
-            );
-          }
-          const data: UserProfile = await response.json();
-          setUserProfile(data);
+          const profileData = await fetchUserProfile(loginSuccess.lat);
+          setUserProfile(profileData);
           setProfileError(null);
         } catch (error) {
           if (error instanceof Error) {
@@ -59,7 +45,7 @@ const MainPage = () => {
         }
       };
 
-      fetchProfile();
+      getProfile();
     }
   }, [loginSuccess]);
 
