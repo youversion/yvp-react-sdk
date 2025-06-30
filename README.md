@@ -183,3 +183,19 @@ To run it:
 3.  Start the development server: `npm start`
 
 The demo will open at `http://localhost:3000`.
+
+#### Adding to package.json directly
+
+Instead of running `npm install` you can declare the dependency in your **package.json** like this:
+
+```json
+{
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "yvp-react-sdk": "git+https://github.com/youversion/yvp-react-sdk.git"
+  }
+}
+```
+
+Then run `npm install` and the SDK will be pulled from GitHub using HTTPS.
